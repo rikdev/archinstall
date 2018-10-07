@@ -1,0 +1,97 @@
+#!/bin/bash
+
+# https://wiki.archlinux.org/index.php/installation_guide#Installation
+# https://wiki.archlinux.org/index.php/installation_guide#Configure_the_system
+
+source common.sh
+
+readonly ROOT_DIR=/mnt
+
+# https://wiki.archlinux.org/index.php/installation_guide#Format_the_partitions
+readonly SWAP_FILE_PATH="${ROOT_DIR}/${SWAP_FILE_NAME}"
+if ! swapon --show | grep --silent "${SWAP_FILE_PATH}"; then
+  print_section "Create swap"
+  if test_to_agree "Do create a swap file?"; then
+    readonly RAM_SIZE="$(free --bytes | awk '$1 == "Mem:" { print $2 }')"
+    [[ -n "${RAM_SIZE}" ]] || die "Couldn't get RAM size."
+
+    fallocate --length "${RAM_SIZE}" "${SWAP_FILE_PATH}" \
+      && chmod 600 "${SWAP_FILE_PATH}" \
+      && mkswap "${SWAP_FILE_PATH}" \
+      && swapon "${SWAP_FILE_PATH}" \
+      && echo "Created a swap file '${SWAP_FILE_PATH}' of size ${RAM_SIZE} bytes." \
+      || die "Couldn't create swap."
+  fi
+fi
+
+# https://wiki.archlinux.org/index.php/installation_guide#Install_the_base_packages
+print_section "Install the base packages"
+pacstrap "${ROOT_DIR}" base || die "Couldn't install 'base'."
+
+# https://wiki.archlinux.org/index.php/installation_guide#Fstab
+print_section "Setup fstab"
+sed --in-place '5,$ d' "${ROOT_DIR}/etc/fstab" || die "Couldn't cut fstab."
+genfstab -U "${ROOT_DIR}" | sed "s:${ROOT_DIR}::" >> "${ROOT_DIR}/etc/fstab"
+[[ "${PIPESTATUS[0]}" -eq 0 && "${PIPESTATUS[1]}" -eq 0 ]] \
+  || die "Couldn't setup fstab."
+
+# https://wiki.archlinux.org/index.php/installation_guide#Chroot
+print_section "Chroot"
+arch-chroot "${ROOT_DIR}" /bin/bash <(cat common.sh - <<'EOF'
+  # https://wiki.archlinux.org/index.php/installation_guide#Time_zone
+  print_section "Time zone"
+  ln --symbolic --force /usr/share/zoneinfo/Asia/Novosibirsk /etc/localtime
+  hwclock --systohc || die "Couldn't generate '/etc/adjtime'."
+
+  # https://wiki.archlinux.org/index.php/installation_guide#Localization
+  print_section "Localization"
+  sed --in-place 's/^#\(en_US\.UTF-8\|ru_RU\.UTF-8\)/\1/' /etc/locale.gen \
+    || die "Couldn't patch '/etc/locale.gen'."
+  locale-gen || die "Couldn't generate locale."
+  echo "LANG=en_US.UTF-8" > /etc/locale.conf
+  echo "KEYMAP=${KEYMAP}" > /etc/vconsole.conf
+  echo "FONT=${FONT}" >> /etc/vconsole.conf
+
+  # https://wiki.archlinux.org/index.php/installation_guide#Network_configuration
+  print_section "Network configuration"
+  if [[ ! -e /etc/hostname ]]; then
+    read -r -p "Input your hostname: "
+    [[ -n "${REPLY}" ]] || die "Invalid hostname."
+    echo "${REPLY}" > /etc/hostname
+    echo -e "127.0.0.1\t${REPLY}" >> "/etc/hosts"
+  fi
+  systemctl enable dhcpcd.service || die "Couldn't enable 'dhcpcd.service'."
+
+  # https://wiki.archlinux.org/index.php/installation_guide#Root_password
+  print_section "Root password"
+  passwd || die "Couldn't set root password."
+
+  # https://wiki.archlinux.org/index.php/installation_guide#Boot_loader
+  print_section "Boot loader"
+  if grep --silent '^vendor_id[[:space:]]*: GenuineIntel' /proc/cpuinfo; then
+    pacman_sync intel-ucode || die "Couldn't install 'intel-ucode'."
+  fi
+  if is_uefi_boot_mode; then
+    pacman_sync efibootmgr || die "Couldn't install 'efibootmgr'."
+  fi
+  pacman_sync grub || die "Couldn't install 'grub'."
+EOF
+) || exit "$?"
+
+echo
+cat <<EOF
+1. Make 'arch-chroot /mnt' and complete the network configuration for the
+   newly installed environment.
+2. Install boot loader by typing:
+   'grub-install --recheck --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB'
+   for UEFI system or typing:
+   'grub-install --recheck --target=i386-pc /dev/sdX'
+   for BIOS system.
+   For details see https://wiki.archlinux.org/index.php/GRUB
+3. Generate grub.cfg: 'grub-mkconfig --output /boot/grub/grub.cfg'.
+4. Exit the chroot environment.
+5. Disable swapping: 'swapoff --all'.
+6. Unmount all the partitions: 'umount --recursive /mnt'
+7. Restart the machine: 'reboot'.
+8. Run './3_post_installation'.
+EOF

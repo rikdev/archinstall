@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# https://wiki.archlinux.org/index.php/installation_guide#Pre-installation
+
+source common.sh
+
+# https://wiki.archlinux.org/index.php/installation_guide#Set_the_keyboard_layout
+print_section "Set the keyboard layout"
+loadkeys "${KEYMAP}" || die "Couldn't load keys '${KEYMAP}'."
+setfont "${FONT}" || die "Couldn't set font '${FONT}'."
+
+# https://wiki.archlinux.org/index.php/installation_guide#Verify_the_boot_mode
+print_section "Verify the boot mode"
+is_uefi_boot_mode && echo "UEFI boot mode." || echo "BIOS boot mode."
+
+# https://wiki.archlinux.org/index.php/installation_guide#Connect_to_the_Internet
+print_section "Check connect to the Internet"
+ping -c1 archlinux.org || die "No internet connection."
+
+# https://wiki.archlinux.org/index.php/installation_guide#Update_the_system_clock
+print_section "Update the system clock"
+timedatectl set-ntp true || die "Couldn't enable NTP."
+sleep 5
+timedatectl status
+
+# https://wiki.archlinux.org/index.php/installation_guide#Partition_the_disks
+print_section "Partition the disks"
+lsblk
+echo
+cat <<EOF
+GPT example layout:
+Mount point         Partition type  File system  Sggested size  Note
+None                BIOS boot       None         1 MiB          Optional for BIOS/GPT boot mode only
+/boot/efi           EFI system      FAT32        256-512 MiB
+/                   Linux root      EXT4         Remainder
+/home               Linux home      EXT4/XFS     Remainder      Optional for multidisk configuration
+
+BIOS example layout:
+Mount point  Partition type  Attributes  File system  Suggested size  Note
+/boot        83: Linux       2 bootable  EXT4         200 MiB         Optional for multiboot
+/            83: Linux                   EXT4         Remainder
+/home        83: Linux                   EXT4/XFS     Remainder       Optional for multidisk configuration
+
+1. Create partitions and file systems and mount it to '/mnt'.
+2. Edit '/etc/pacman.d/mirrorlist'
+3. Run './2_installation'.
+EOF
