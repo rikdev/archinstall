@@ -4,13 +4,6 @@ source common.sh
 
 print_section "Networking"
 
-if test_to_agree "Do install Wi-Fi utilites (iw, wpa_supplicant)?"; then
-  # https://wiki.archlinux.org/index.php/Wireless_network_configuration
-  pacman_sync iw wpa_supplicant || die "Couldn't install Wi-Fi utilites."
-  # https://wiki.archlinux.org/index.php/Netctl#Installation
-  pacman_sync dialog || die "Couldn't install 'dialog'."
-fi
-
 if test_to_agree "Do install bluetooth utilites (bluez, bluez-utils)?"; then
   # https://wiki.archlinux.org/index.php/bluetooth#Installation
   pacman_sync bluez bluez-utils || die "Couldn't install Bluetooth tools."
@@ -25,38 +18,64 @@ timedatectl set-ntp true || die "Couldn't enable NTP."
 
 # https://wiki.archlinux.org/index.php/general_recommendations#DNS_security
 print_subsection "DNS security"
-# https://wiki.archlinux.org/index.php/DNSSEC#Install_a_DNSSEC-aware_validating_recursive_server
-# https://wiki.archlinux.org/index.php/Dnsmasq#Installation
-pacman_sync dnsmasq
-# https://wiki.archlinux.org/index.php/Dnsmasq#Configuration
-sed --in-place '$ s/#\(conf-dir=\)/\1/' /etc/dnsmasq.conf \
-  || "Couldn't patch '/etc/dnsmasq.conf'."
-readonly DNSMASQ_CONF_DIR_PATH=/etc/dnsmasq.d
-mkdir --parent "${DNSMASQ_CONF_DIR_PATH}"
-cat <<EOF > "${DNSMASQ_CONF_DIR_PATH}/dns-proxy.conf"
-listen-address=::1,127.0.0.1
-cache-size=1000
-resolv-file="${DNSMASQ_CONF_DIR_PATH}/openresolv.nameservers"
-# Enable DNSSEC
-# uncomment to enable DNSSEC if resolver is supporting it
-#dnssec
-dnssec-check-unsigned
-conf-file=/usr/share/dnsmasq/trust-anchors.conf
-EOF
-# https://wiki.archlinux.org/index.php/Dnsmasq#openresolv
-sed --in-place '/\(name_servers\|dnsmasq_conf\|dnsmasq_resolv\)=/ d' \
-  /etc/resolvconf.conf
-cat <<EOF >> /etc/resolvconf.conf
-name_servers="::1 127.0.0.1"
-dnsmasq_conf="${DNSMASQ_CONF_DIR_PATH}/dnsmasq-openresolv.conf"
-dnsmasq_resolv="${DNSMASQ_CONF_DIR_PATH}/openresolv.nameservers"
-EOF
-resolvconf -u
-systemctl_permanently_start dnsmasq.service \
-  || die "Couldn't start 'dnsmasq.service'."
+# dhcpcd can owerwrite 'resolv.conf'
+# https://wiki.archlinux.org/index.php/Dhcpcd#resolv.conf
+systemctl stop dhcpcd.service
+systemctl disable dhcpcd.service
+
+# https://wiki.archlinux.org/index.php/systemd-resolved#Configuration
+ln --symbolic --force /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+systemctl_permanently_start systemd-resolved.service \
+  || die "Couldn't start 'systemd-resolved.service'."
+
+# https://wiki.archlinux.org/index.php/systemd-resolved#Automatically
+# https://wiki.archlinux.org/index.php/NetworkManager#Installation
+pacman_sync networkmanager || die "Couldn't install 'networkmanager'."
+# https://wiki.archlinux.org/index.php/NetworkManager#Enable_NetworkManager
+systemctl_permanently_start NetworkManager.service \
+  || die "Couldn't start 'NetworkManager.service'."
 
 # https://wiki.archlinux.org/index.php/Network_configuration#Check_the_connection
 ping -c1 archlinux.org || die "Couldn't ping 'archlinux.org'."
+
+# https://wiki.archlinux.org/index.php/NetworkManager#Using_Gnome-Keyring
+# https://wiki.archlinux.org/index.php/GNOME/Keyring#Installation
+pacman_sync gnome-keyring || die "Couldn't install 'gnome-keyring'."
+# https://wiki.archlinux.org/index.php/GNOME/Keyring#PAM_method
+gawk --include inplace '
+  BEGIN {
+      auth_rule = "auth       optional     pam_gnome_keyring.so"
+      session_rule = "session    optional     pam_gnome_keyring.so auto_start"
+  }
+
+  # remove old rules for "pam_gnome_keyring.so"
+  /\ypam_gnome_keyring\.so\y/ { next }
+
+  ($1 == "account" || $1 == "password" || $1 == "session") && auth_rule != "" {
+      print auth_rule; auth_rule = ""
+  }
+  { print }
+  ENDFILE {
+      if (auth_rule != "") print auth_rule
+      print session_rule
+  }
+' /etc/pam.d/login || die "Couldn't patch '/etc/pam.d/login'."
+gawk --include inplace '
+  BEGIN {
+      password_rule = "password	optional	pam_gnome_keyring.so"
+  }
+
+  # remove old rules for "pam_gnome_keyring.so"
+  /\ypam_gnome_keyring\.so\y/ { next }
+
+  $1 == "session" && password_rule != "" {
+      print password_rule; password_rule = ""
+  }
+  { print }
+  ENDFILE {
+      if (password_rule != "") print password_rule
+  }
+' /etc/pam.d/passwd || die "Couldn't patch '/etc/pam.d/passwd'."
 
 # https://wiki.archlinux.org/index.php/general_recommendations#Setting_up_a_firewall
 # https://wiki.archlinux.org/index.php/Security#Firewalls
@@ -77,7 +96,7 @@ sed --in-place '
     #udp sport snmp accept\
     #udp dport snmp-trap accept\n
 
-  # https://wiki.archlinux.org/index.php/avahi#Firewall
+  # https://wiki.archlinux.org/index.php/systemd-resolved#mDNS
   # remove old mDNS settings
   /# allow mDNS/,/^$/ d
   # add new mDNS settings
@@ -85,6 +104,15 @@ sed --in-place '
     # allow mDNS\
     #ip daddr 224.0.0.251 udp dport mdns accept\
     #ip6 daddr ff02::fb udp dport mdns accept\n
+
+  # https://wiki.archlinux.org/index.php/systemd-resolved#LLMNR
+  # remove old LLMNR settings
+  /# allow LLMNR/,/^$/d
+  # add new LLMNR settings
+  /# everything else/i\
+    # allow LLMNR\
+    #tcp dport hostmon accept\
+    #udp dport hostmon accept\n
 ' /etc/nftables.conf || "Couldn't patch '/etc/nftables.conf'."
 # https://wiki.archlinux.org/index.php/nftables#Usage
 systemctl_permanently_start nftables.service \
