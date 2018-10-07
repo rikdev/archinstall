@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# https://wiki.archlinux.org/index.php/installation_guide#Post-installation
+
+source common.sh
+
+git_etc() {
+  git -C /etc "$@"
+}
+
+git_commit_all() {
+  local -r MESSAGE="$1"
+
+  git_etc add --all || return
+
+  local user_name
+  user_name="$(git_etc config user.name)"
+  user_name="${user_name:-${USER}}"
+  local user_email
+  user_email="$(git_etc config user.email)"
+  git_etc -c user.name="${user_name}" -c user.email="${user_email}" commit \
+    --allow-empty --message="${MESSAGE}"
+}
+
+echo "WARNING! Your system settings will be overwritten!"
+if ! test_to_agree "Continue?"; then
+  exit 0
+fi
+
+# https://wiki.archlinux.org/index.php/Dotfiles#Version_control
+echo
+pacman_sync git || die "Couldn't install git."
+git_etc init || die "Couldn't initialize git repository in '/etc' directory."
+chmod 700 /etc/.git
+git_commit_all "Before run '$(basename "$0")'" \
+  || die "Couldn't commit changes in '/etc' directory."
+
+for f in ./3_post_installation.d/?*.sh; do
+  /bin/bash "${f}" || exit "$?"
+done
+unset f
+
+echo
+git_commit_all "After run '$(basename "$0")'" \
+  || die "Couldn't commit changes in '/etc' directory."
+
+echo
+cat <<EOF
+1. Disable periodic TRIM and enable continuous TRIM if SSD support it.
+   https://wiki.archlinux.org/index.php/Solid_State_Drive#TRIM
+2. Install display driver
+   https://wiki.archlinux.org/index.php/general_recommendations#Display_drivers
+3. Allow some ports in '/etc/nftables.conf'
+   https://wiki.archlinux.org/index.php/nftables
+4. Enable DNSSEC if your resolver is supporting it.
+   /etc/dnsmasq.d/dns-proxy.conf
+EOF
+
+if test_to_agree "Do reboot a system to apply all settings?"; then
+  reboot
+fi
