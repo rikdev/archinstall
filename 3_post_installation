@@ -52,8 +52,6 @@ cat <<EOF
    https://wiki.archlinux.org/index.php/general_recommendations#Display_drivers
 3. Allow some ports in '/etc/nftables.conf'
    https://wiki.archlinux.org/index.php/nftables
-4. Enable DNSSEC if your resolver is supporting it.
-   /etc/dnsmasq.d/dns-proxy.conf
 EOF
 
 if test_to_agree "Do reboot a system to apply all settings?"; then
