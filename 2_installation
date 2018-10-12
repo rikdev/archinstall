@@ -15,6 +15,7 @@ if ! swapon --show | grep --silent "${SWAP_FILE_PATH}"; then
     readonly RAM_SIZE="$(free --bytes | awk '$1 == "Mem:" { print $2 }')"
     [[ -n "${RAM_SIZE}" ]] || die "Couldn't get RAM size."
 
+    # shellcheck disable=SC2015
     fallocate --length "${RAM_SIZE}" "${SWAP_FILE_PATH}" \
       && chmod 600 "${SWAP_FILE_PATH}" \
       && mkswap "${SWAP_FILE_PATH}" \

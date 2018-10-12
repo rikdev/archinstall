@@ -12,6 +12,7 @@ out() {
   local -r TEXT="$3"
   local -r PARAMETERS=("${@:4}")
   tput setaf "${TEXT_COLOR}"
+  # shellcheck disable=SC2059
   printf "${PREFIX} ${TEXT}\\n" "${PARAMETERS[@]}"
   tput sgr0
 }

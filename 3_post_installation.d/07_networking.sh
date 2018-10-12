@@ -83,6 +83,7 @@ print_subsection "Setting up a firewall"
 # https://wiki.archlinux.org/index.php/nftables#Installation
 pacman_sync nftables || die "Couldn't install 'nftables'."
 # https://wiki.archlinux.org/index.php/nftables#Configuration
+# shellcheck disable=SC1004
 sed --in-place '
   # https://wiki.archlinux.org/index.php/nftables#Limit_rate_IPv4.2FIPv6_firewall
   s/tcp dport ssh .*/tcp dport ssh ct state new limit rate 15\/minute accept/

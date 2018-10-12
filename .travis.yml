@@ -1,0 +1,9 @@
+language: shell
+sudo: false
+script:
+  - bash -c 'shopt -s globstar; shellcheck --shell=bash --external-sources
+    common.sh
+    1_pre_installation
+    2_installation
+    3_post_installation
+    3_post_installation.d/*'
