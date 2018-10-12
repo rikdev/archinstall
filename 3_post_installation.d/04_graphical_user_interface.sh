@@ -129,5 +129,6 @@ pacman_sync dmenu || die "Couldn't install 'dmenu'."
 # https://wiki.archlinux.org/index.php/general_recommendations#Display_manager
 print_subsection "Display manager"
 # https://wiki.archlinux.org/index.php/Xinit#Autostart_X_at_login
+# shellcheck disable=SC2016
 echo '[ -z "${DISPLAY:-}" -a "$(tty)" = "/dev/tty1" ] && exec startx' \
   > /etc/profile.d/startx.sh
