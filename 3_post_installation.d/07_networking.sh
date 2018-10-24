@@ -88,6 +88,14 @@ sed --in-place '
   # https://wiki.archlinux.org/index.php/nftables#Limit_rate_IPv4.2FIPv6_firewall
   s/tcp dport ssh .*/tcp dport ssh ct state new limit rate 15\/minute accept/
 
+  # https://wiki.archlinux.org/index.php/PPTP_Client#Troubleshooting
+  # remove old GRE settings
+  /# allow GRE/,/^$/ d
+  # add new GRE settings
+  /# early drop of invalid connections/ i\
+    # allow GRE (before drop of invalid connections)\
+    #ip protocol gre accept\
+
   # https://www.cups.org/doc/network.html#SNMP
   # remove old SNMP settings
   /# allow SNMP Manager/,/^$/ d
