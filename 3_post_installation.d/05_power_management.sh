@@ -88,10 +88,3 @@ sed --in-place \
   /etc/UPower/UPower.conf || die "Couldn't patch '/etc/UPower/UPower.conf'."
 systemctl_permanently_start upower.service \
   || die "Couldn't start 'upower.service'."
-
-# https://wiki.archlinux.org/index.php/Power_management#Audio
-print_subsection "Audio"
-cat <<'EOF' > /etc/modprobe.d/audio_powersave.conf
-options snd_hda_intel power_save=1
-options snd_ac97_codec power_save=1
-EOF
