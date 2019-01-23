@@ -12,14 +12,7 @@ git_commit_all() {
   local -r MESSAGE="$1"
 
   git_etc add --all || return
-
-  local user_name
-  user_name="$(git_etc config user.name)"
-  user_name="${user_name:-${USER}}"
-  local user_email
-  user_email="$(git_etc config user.email)"
-  git_etc -c user.name="${user_name}" -c user.email="${user_email}" commit \
-    --allow-empty --message="${MESSAGE}"
+  git_etc commit --allow-empty --message="${MESSAGE}"
 }
 
 echo "WARNING! Your system settings will be overwritten!"
@@ -29,9 +22,18 @@ fi
 
 # https://wiki.archlinux.org/index.php/Dotfiles#Version_control
 echo
+# init repository
 pacman_sync git || die "Couldn't install git."
 git_etc init || die "Couldn't initialize git repository in '/etc' directory."
 chmod 700 /etc/.git
+# configure git
+if ! git_etc config user.name > /dev/null; then
+  git config --global user.name "${USER}"
+fi
+if ! git_etc config user.email > /dev/null; then
+  git config --global user.email "${USER}@$(hostname --long)"
+fi
+# initial commit
 git_commit_all "Before run '$(basename "$0")'" \
   || die "Couldn't commit changes in '/etc' directory."
 
