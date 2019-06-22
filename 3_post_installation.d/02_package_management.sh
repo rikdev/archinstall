@@ -8,8 +8,7 @@ print_section "Package management"
 print_subsection "Pacman"
 # https://wiki.archlinux.org/index.php/Pacman#Cleaning_the_package_cache
 pacman_sync pacman-contrib || die "Couldn't install 'pacman-contrib'."
-systemctl_permanently_start paccache.timer \
-  || die "Couldn't start 'paccache.timer'."
+systemctl enable --now paccache.timer || die "Couldn't start 'paccache.timer'."
 
 # https://wiki.archlinux.org/index.php/General_recommendations#Repositories
 print_subsection "Repositories"

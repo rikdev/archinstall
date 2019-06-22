@@ -51,10 +51,6 @@ pacman_sync() {
   pacman --sync --noconfirm --needed "$@"
 }
 
-systemctl_permanently_start() {
-  systemctl enable "$@" && systemctl restart "$@"
-}
-
 udevadm_reload() {
   udevadm control --reload && udevadm trigger
 }

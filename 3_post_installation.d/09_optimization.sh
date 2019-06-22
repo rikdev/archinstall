@@ -47,4 +47,4 @@ sysctl --load="${WATCHDOGS_CONF_FILE_PATH}" \
   || die "Couldn't load '${WATCHDOGS_CONF_FILE_PATH}'"
 # https://wiki.archlinux.org/index.php/general_recommendations#Solid_state_drives
 # https://wiki.archlinux.org/index.php/Solid_state_drive#Periodic_TRIM
-systemctl_permanently_start fstrim.timer || die "Couldn't start 'fstrim.timer'."
+systemctl enable --now fstrim.timer || die "Couldn't start 'fstrim.timer'."
