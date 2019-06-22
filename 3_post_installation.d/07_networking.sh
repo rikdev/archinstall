@@ -7,7 +7,7 @@ print_section "Networking"
 if test_to_agree "Do install bluetooth utilites (bluez, bluez-utils)?"; then
   # https://wiki.archlinux.org/index.php/bluetooth#Installation
   pacman_sync bluez bluez-utils || die "Couldn't install Bluetooth tools."
-  systemctl_permanently_start bluetooth.service \
+  systemctl enable --now bluetooth.service \
     || die "Couldn't start 'bluetooth.service'."
 fi
 
@@ -20,19 +20,18 @@ timedatectl set-ntp true || die "Couldn't enable NTP."
 print_subsection "DNS security"
 # dhcpcd can owerwrite 'resolv.conf'
 # https://wiki.archlinux.org/index.php/Dhcpcd#resolv.conf
-systemctl stop dhcpcd.service
-systemctl disable dhcpcd.service
+systemctl disable --now dhcpcd.service
 
 # https://wiki.archlinux.org/index.php/systemd-resolved#Configuration
 ln --symbolic --force /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
-systemctl_permanently_start systemd-resolved.service \
+systemctl enable --now systemd-resolved.service \
   || die "Couldn't start 'systemd-resolved.service'."
 
 # https://wiki.archlinux.org/index.php/systemd-resolved#Automatically
 # https://wiki.archlinux.org/index.php/NetworkManager#Installation
 pacman_sync networkmanager || die "Couldn't install 'networkmanager'."
 # https://wiki.archlinux.org/index.php/NetworkManager#Enable_NetworkManager
-systemctl_permanently_start NetworkManager.service \
+systemctl enable --now NetworkManager.service \
   || die "Couldn't start 'NetworkManager.service'."
 
 # https://wiki.archlinux.org/index.php/Network_configuration#Check_the_connection
@@ -124,7 +123,7 @@ sed --in-place '
     #udp dport hostmon accept\n
 ' /etc/nftables.conf || "Couldn't patch '/etc/nftables.conf'."
 # https://wiki.archlinux.org/index.php/nftables#Usage
-systemctl_permanently_start nftables.service \
+systemctl enable --now nftables.service \
   || die "Couldn't start 'nftables.service'."
 
 # https://wiki.archlinux.org/index.php/general_recommendations#Resource_sharing

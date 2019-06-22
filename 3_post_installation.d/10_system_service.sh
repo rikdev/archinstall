@@ -8,7 +8,7 @@ print_section "System service"
 print_subsection "Printing"
 # https://wiki.archlinux.org/index.php/CUPS#Installation
 pacman_sync cups cups-pdf || die "Couldn't install printing utilites."
-systemctl_permanently_start org.cups.cupsd.service \
+systemctl enable --now org.cups.cupsd.service \
   || die "Couldn't start 'org.cups.cupsd.service'."
 # https://wiki.archlinux.org/index.php/CUPS#CLI_tools
 lpadmin \

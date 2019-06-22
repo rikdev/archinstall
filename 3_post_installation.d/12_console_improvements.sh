@@ -8,4 +8,4 @@ print_section "Console improvements"
 print_subsection "Mouse support"
 # https://wiki.archlinux.org/index.php/General_purpose_mouse
 pacman_sync gpm || die "Couldn't install 'gpm'."
-systemctl_permanently_start gpm.service || die "Couldn't start 'gpm.service'."
+systemctl enable --now gpm.service || die "Couldn't start 'gpm.service'."

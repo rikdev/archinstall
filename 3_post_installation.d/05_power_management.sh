@@ -86,5 +86,4 @@ sed --in-place \
   --expression 's/^\(PercentageCritical\)=.*/\1=40/' \
   --expression 's/^\(PercentageAction\)=.*/\1=30/' \
   /etc/UPower/UPower.conf || die "Couldn't patch '/etc/UPower/UPower.conf'."
-systemctl_permanently_start upower.service \
-  || die "Couldn't start 'upower.service'."
+systemctl enable --now upower.service || die "Couldn't start 'upower.service'."
