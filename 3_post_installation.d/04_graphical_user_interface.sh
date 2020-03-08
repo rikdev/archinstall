@@ -132,3 +132,7 @@ print_subsection "Display manager"
 # shellcheck disable=SC2016
 echo '[ -z "${DISPLAY:-}" -a "$(tty)" = "/dev/tty1" ] && exec startx' \
   > /etc/profile.d/startx.sh
+
+# https://wiki.archlinux.org/index.php/General_recommendations#User_directories
+print_subsection "User directories"
+pacman_sync xdg-user-dirs || die "Couldn't install 'xdg-user-dirs'."
