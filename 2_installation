@@ -61,6 +61,7 @@ arch-chroot "${ROOT_DIR}" /bin/bash <(cat common.sh - <<'EOF'
     echo "${REPLY}" > /etc/hostname
     echo -e "127.0.0.1\t${REPLY}" >> "/etc/hosts"
   fi
+  pacman_sync dhcpcd || die "Couldn't install 'dhcpcd'."
   systemctl enable dhcpcd.service || die "Couldn't enable 'dhcpcd.service'."
 
   # https://wiki.archlinux.org/index.php/installation_guide#Root_password
