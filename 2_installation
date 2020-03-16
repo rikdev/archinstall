@@ -33,8 +33,7 @@ pacstrap "${ROOT_DIR}" base linux linux-firmware \
 # https://wiki.archlinux.org/index.php/installation_guide#Fstab
 print_section "Setup fstab"
 sed --in-place '5,$ d' "${ROOT_DIR}/etc/fstab" || die "Couldn't cut fstab."
-genfstab -U "${ROOT_DIR}" | sed "s:${ROOT_DIR}::" >> "${ROOT_DIR}/etc/fstab"
-[[ "${PIPESTATUS[0]}" -eq 0 && "${PIPESTATUS[1]}" -eq 0 ]] \
+genfstab -U "${ROOT_DIR}" >> "${ROOT_DIR}/etc/fstab" \
   || die "Couldn't setup fstab."
 
 # https://wiki.archlinux.org/index.php/installation_guide#Chroot
