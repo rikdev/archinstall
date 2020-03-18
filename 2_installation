@@ -73,6 +73,9 @@ arch-chroot "${ROOT_DIR}" /bin/bash <(cat common.sh - <<'EOF'
   if grep --silent '^vendor_id[[:space:]]*: GenuineIntel' /proc/cpuinfo; then
     pacman_sync intel-ucode || die "Couldn't install 'intel-ucode'."
   fi
+  if grep --silent '^vendor_id[[:space:]]*: AuthenticAMD' /proc/cpuinfo; then
+    pacman_sync amd-ucode || die "Couldn't install 'amd-ucode'."
+  fi
   if is_uefi_boot_mode; then
     pacman_sync efibootmgr || die "Couldn't install 'efibootmgr'."
   fi
