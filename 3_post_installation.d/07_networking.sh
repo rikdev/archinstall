@@ -121,6 +121,14 @@ sed --in-place '
     # allow LLMNR\
     #tcp dport hostmon accept\
     #udp dport hostmon accept\n
+
+  # https://wiki.archlinux.org/index.php/TigerVNC#On_demand_multi-user_mode
+  # remove old VNC settings
+  /# allow VNC/,/^$/ d
+  # add new VNC settings
+  /# everything else/ i\
+    # allow VNC\
+    #tcp dport 5900 accept\n
 ' /etc/nftables.conf || "Couldn't patch '/etc/nftables.conf'."
 # https://wiki.archlinux.org/index.php/nftables#Usage
 systemctl enable --now nftables.service \
