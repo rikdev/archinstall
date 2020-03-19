@@ -35,7 +35,7 @@ systemctl enable --now NetworkManager.service \
   || die "Couldn't start 'NetworkManager.service'."
 
 # https://wiki.archlinux.org/index.php/Network_configuration#Check_the_connection
-ping -c1 archlinux.org || die "Couldn't ping 'archlinux.org'."
+retry ping -c1 archlinux.org || die "Couldn't ping 'archlinux.org'."
 
 # https://wiki.archlinux.org/index.php/NetworkManager#Using_Gnome-Keyring
 # https://wiki.archlinux.org/index.php/GNOME/Keyring#Installation
