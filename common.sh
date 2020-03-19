@@ -42,6 +42,15 @@ test_to_agree() {
   [[ "${REPLY}" =~ ^[Yy]$ ]]
 }
 
+retry() {
+  local return_code=0
+  for (( i=0; i<5; ++i )); do
+    "$@" && return 0 || return_code="$?"
+    sleep 1
+  done
+  return "${return_code}"
+}
+
 is_uefi_boot_mode() {
   ls /sys/firmware/efi/efivars >/dev/null 2>/dev/null
 }
