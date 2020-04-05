@@ -6,7 +6,7 @@ print_section "Networking"
 
 if test_to_agree "Do install bluetooth utilites (bluez, bluez-utils)?"; then
   # https://wiki.archlinux.org/index.php/bluetooth#Installation
-  pacman_sync bluez bluez-utils || die "Couldn't install Bluetooth tools."
+  pacman_sync bluez{,-utils} || die "Couldn't install Bluetooth tools."
   systemctl enable --now bluetooth.service \
     || die "Couldn't start 'bluetooth.service'."
 fi
