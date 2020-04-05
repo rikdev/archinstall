@@ -60,7 +60,7 @@ Xft.rgba: rgb
 EOF
 
 # https://wiki.archlinux.org/index.php/Fonts
-pacman_sync xorg-fonts-misc xorg-fonts-cyrillic ttf-dejavu \
+pacman_sync xorg-fonts-{misc,cyrillic} ttf-dejavu \
   || die "Couldn't install fonts."
 if [[ -n "${DISPLAY:-}" ]]; then
   xset fp rehash || die "Couldn't reread font databases."

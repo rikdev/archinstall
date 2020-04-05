@@ -49,11 +49,8 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 # https://wiki.archlinux.org/index.php/Security#Allow_only_certain_users
 print_subsection "Allow only certain users"
-readonly AUTH_RESTRICTION_TEMPLATE='/^#\s*auth\s\+required\s\+pam_wheel/ s/#//'
-sed --in-place "${AUTH_RESTRICTION_TEMPLATE}" /etc/pam.d/su \
-  || die "Couldn't patch '/etc/pam.d/su'."
-sed --in-place "${AUTH_RESTRICTION_TEMPLATE}" /etc/pam.d/su-l \
-  || die "Couldn't patch '/etc/pam.d/su-l'."
+sed --in-place '/^#\s*auth\s\+required\s\+pam_wheel/ s/#//' /etc/pam.d/su{,-l} \
+  || die "Couldn't patch '/etc/pam.d/su{,-l}'."
 
 # https://wiki.archlinux.org/index.php/Security#Kernel_hardening
 

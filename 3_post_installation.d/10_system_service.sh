@@ -7,7 +7,7 @@ print_section "System service"
 # https://wiki.archlinux.org/index.php/general_recommendations#Printing
 print_subsection "Printing"
 # https://wiki.archlinux.org/index.php/CUPS#Installation
-pacman_sync cups cups-pdf || die "Couldn't install printing utilites."
+pacman_sync cups{,-pdf} || die "Couldn't install printing utilites."
 systemctl enable --now org.cups.cupsd.service \
   || die "Couldn't start 'org.cups.cupsd.service'."
 # https://wiki.archlinux.org/index.php/CUPS#CLI_tools
