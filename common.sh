@@ -7,13 +7,13 @@ readonly FONT='UniCyrExt_8x16'
 readonly SWAP_FILE_NAME='swapfile'
 
 out() {
-  local -r TEXT_COLOR="$1"
-  local -r PREFIX="$2"
-  local -r TEXT="$3"
-  local -r PARAMETERS=("${@:4}")
-  tput setaf "${TEXT_COLOR}"
+  local -r LOCAL_TEXT_COLOR="$1"
+  local -r LOCAL_PREFIX="$2"
+  local -r LOCAL_TEXT="$3"
+  local -r LOCAL_PARAMETERS=("${@:4}")
+  tput setaf "${LOCAL_TEXT_COLOR}"
   # shellcheck disable=SC2059
-  printf "${PREFIX} ${TEXT}\\n" "${PARAMETERS[@]}"
+  printf "${LOCAL_PREFIX} ${LOCAL_TEXT}\\n" "${LOCAL_PARAMETERS[@]}"
   tput sgr0
 }
 
@@ -35,20 +35,20 @@ die() {
 }
 
 test_to_agree() {
-  local -r TEXT="$1"
+  local -r LOCAL_TEXT="$1"
   # Clear stdin
   while read -r -t 0; do read -r; done
-  read -r -p "${TEXT} (y,N) "
+  read -r -p "${LOCAL_TEXT} (y,N) "
   [[ "${REPLY}" =~ ^[Yy]$ ]]
 }
 
 retry() {
-  local return_code=0
+  local local_return_code=0
   for (( i=0; i<5; ++i )); do
-    "$@" && return 0 || return_code="$?"
+    "$@" && return 0 || local_return_code="$?"
     sleep 1
   done
-  return "${return_code}"
+  return "${local_return_code}"
 }
 
 is_uefi_boot_mode() {
