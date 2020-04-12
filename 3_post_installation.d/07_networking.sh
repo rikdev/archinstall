@@ -129,6 +129,14 @@ sed --in-place '
   /# everything else/ i\
     # allow VNC\
     #tcp dport 5900 accept\n
+
+  # https://wiki.archlinux.org/index.php/PulseAudio#On_the_server
+  # remove old PulseAudio network server settings
+  /# allow PulseAudio network server/,/^$/ d
+  # add new PulseAudio network server settings
+  /# everything else/ i\
+    # allow PulseAudio network server\
+    #tcp dport 4713 accept\n
 ' /etc/nftables.conf || "Couldn't patch '/etc/nftables.conf'."
 # https://wiki.archlinux.org/index.php/nftables#Usage
 systemctl enable --now nftables.service \
