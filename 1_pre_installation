@@ -25,7 +25,7 @@ timedatectl status
 
 # https://wiki.archlinux.org/index.php/installation_guide#Partition_the_disks
 print_section "Partition the disks"
-lsblk
+lsblk --output '+FSTYPE,LABEL'
 echo
 cat <<EOF
 GPT example layout:
