@@ -8,8 +8,11 @@ print_section "System service"
 print_subsection "Printing"
 # https://wiki.archlinux.org/index.php/CUPS#Installation
 pacman_sync cups{,-pdf} || die "Couldn't install printing utilites."
-systemctl enable --now org.cups.cupsd.service \
-  || die "Couldn't start 'org.cups.cupsd.service'."
+# https://www.cups-pdf.de/documentation.shtml#Installation
+killall --quiet -- cupsd || true
+# https://wiki.archlinux.org/index.php/CUPS#Socket_activation
+systemctl enable --now org.cups.cupsd.socket \
+  || die "Couldn't start 'org.cups.cupsd.socket'."
 # https://wiki.archlinux.org/index.php/CUPS#CLI_tools
 lpadmin \
   -p Virtual_PDF_Printer \
@@ -21,6 +24,3 @@ lpadmin \
 
 lpadmin -d Virtual_PDF_Printer \
   || die "Couldn't set 'Virtual PDF Printer' as default printer."
-
-systemctl restart org.cups.cupsd.service \
-  || die "Couldn't restart 'org.cups.cupsd.service'."
