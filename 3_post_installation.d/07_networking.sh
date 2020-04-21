@@ -137,6 +137,10 @@ sed --in-place '
   /# everything else/ i\
     # allow PulseAudio network server\
     #tcp dport 4713 accept\n
+
+  # https://wiki.archlinux.org/index.php/Nftables#Working_with_Docker
+  # accept the forward chain to allow traffic from Docker containers
+  /type filter hook forward/,/}/ s/^\(\s*\)\(drop\)$/\1#\2/
 ' /etc/nftables.conf || "Couldn't patch '/etc/nftables.conf'."
 # https://wiki.archlinux.org/index.php/nftables#Usage
 systemctl enable --now nftables.service \
