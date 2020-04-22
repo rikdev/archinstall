@@ -31,7 +31,7 @@ if ! git_etc config user.name > /dev/null; then
   git config --global user.name "${USER}"
 fi
 if ! git_etc config user.email > /dev/null; then
-  git config --global user.email "${USER}@$(hostname --long)"
+  git config --global user.email "${USER}@$(cat /etc/hostname)"
 fi
 # initial commit
 git_commit_all "Before run '$(basename "$0")'" \
