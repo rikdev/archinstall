@@ -11,10 +11,10 @@ out() {
   local -r LOCAL_PREFIX="$2"
   local -r LOCAL_TEXT="$3"
   local -r LOCAL_PARAMETERS=("${@:4}")
-  tput setaf "${LOCAL_TEXT_COLOR}"
+  [[ -f /dev/stdout ]] || tput setaf "${LOCAL_TEXT_COLOR}"
   # shellcheck disable=SC2059
   printf "${LOCAL_PREFIX} ${LOCAL_TEXT}\\n" "${LOCAL_PARAMETERS[@]}"
-  tput sgr0
+  [[ -f /dev/stdout ]] || tput sgr0
 }
 
 print_section() {
