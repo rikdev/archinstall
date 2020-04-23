@@ -2,6 +2,7 @@
 
 # https://wiki.archlinux.org/index.php/installation_guide#Pre-installation
 
+cd "$(dirname "${BASH_SOURCE[0]}")"
 source common.sh
 
 # https://wiki.archlinux.org/index.php/installation_guide#Set_the_keyboard_layout

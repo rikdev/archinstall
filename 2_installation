@@ -3,6 +3,7 @@
 # https://wiki.archlinux.org/index.php/installation_guide#Installation
 # https://wiki.archlinux.org/index.php/installation_guide#Configure_the_system
 
+cd "$(dirname "${BASH_SOURCE[0]}")"
 source common.sh
 
 readonly ROOT_DIR=/mnt
