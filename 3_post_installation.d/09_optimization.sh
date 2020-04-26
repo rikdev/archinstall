@@ -21,12 +21,16 @@ echo 'vm.swappiness = 10' > "${SWAPPINESS_CONF_FILE_PATH}"
 sysctl --load="${SWAPPINESS_CONF_FILE_PATH}" \
   || die "Couldn't load '${SWAPPINESS_CONF_FILE_PATH}'."
 
-# https://wiki.archlinux.org/index.php/Zswap#Enabling_zswap
 # https://wiki.archlinux.org/index.php/Systemd#Temporary_files
 readonly ZSWAP_CONF_FILE_PATH=/etc/tmpfiles.d/enable-zswap.conf
 cat <<'EOF' > "${ZSWAP_CONF_FILE_PATH}"
-#Type Path                                 Mode UID GID Age Argument
-w     /sys/module/zswap/parameters/enabled -    -   -   -   1
+#Type Path                                    Mode UID GID Age Argument
+# https://wiki.archlinux.org/index.php/Zswap#Enabling_zswap
+w     /sys/module/zswap/parameters/enabled    -    -   -   -   1
+# https://wiki.archlinux.org/index.php/Zswap#Compression_algorithm
+w     /sys/module/zswap/parameters/compressor -    -   -   -   lz4
+# https://wiki.archlinux.org/index.php/Zswap#Compressed_memory_pool_allocator
+w     /sys/module/zswap/parameters/zpool      -    -   -   -   z3fold
 EOF
 systemd-tmpfiles --create "${ZSWAP_CONF_FILE_PATH}" \
   || die "Couldn't apply '${ZSWAP_CONF_FILE_PATH}'."
