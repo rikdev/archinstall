@@ -1,6 +1,4 @@
-# Set paranoidal mode
-set -eu
-set -o pipefail
+set -o errexit -o nounset -o pipefail
 
 readonly KEYMAP='ruwin_cplk-UTF-8'
 readonly FONT='UniCyrExt_8x16'
