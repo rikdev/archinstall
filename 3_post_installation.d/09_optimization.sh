@@ -15,12 +15,6 @@ EOF
 # https://wiki.archlinux.org/index.php/Udev#Loading_new_rules
 udevadm_reload || die "Couldn't load '${IOSCHEDULERS_RULES_FILE_PATH}'."
 
-# https://wiki.archlinux.org/index.php/Swap#Swappiness
-readonly SWAPPINESS_CONF_FILE_PATH=/etc/sysctl.d/swappiness.conf
-echo 'vm.swappiness = 10' > "${SWAPPINESS_CONF_FILE_PATH}"
-sysctl --load="${SWAPPINESS_CONF_FILE_PATH}" \
-  || die "Couldn't load '${SWAPPINESS_CONF_FILE_PATH}'."
-
 # https://wiki.archlinux.org/index.php/Systemd#Temporary_files
 readonly ZSWAP_CONF_FILE_PATH=/etc/tmpfiles.d/enable-zswap.conf
 cat <<'EOF' > "${ZSWAP_CONF_FILE_PATH}"
