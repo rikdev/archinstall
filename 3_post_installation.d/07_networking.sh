@@ -28,53 +28,21 @@ systemctl enable --now systemd-resolved.service \
   || die "Couldn't start 'systemd-resolved.service'."
 
 # https://wiki.archlinux.org/index.php/systemd-resolved#Automatically
-# https://wiki.archlinux.org/index.php/NetworkManager#Installation
-pacman_sync networkmanager || die "Couldn't install 'networkmanager'."
-# https://wiki.archlinux.org/index.php/NetworkManager#Enable_NetworkManager
-systemctl enable --now NetworkManager.service \
-  || die "Couldn't start 'NetworkManager.service'."
+# https://wiki.archlinux.org/index.php/systemd-resolved#Configuration
+# https://wiki.archlinux.org/index.php/Systemd-networkd#network_files
+cat <<'EOF' > /etc/systemd/network/99-default.network
+[Match]
+Type=ether wlan
+
+[Network]
+DHCP=yes
+EOF
+# https://wiki.archlinux.org/index.php/Systemd-networkd#Required_services_and_setup
+systemctl enable --now systemd-networkd.service \
+  || die "Couldn't enable 'systemd-networkd.service'."
 
 # https://wiki.archlinux.org/index.php/Network_configuration#Check_the_connection
 retry ping -c1 archlinux.org || die "Couldn't ping 'archlinux.org'."
-
-# https://wiki.archlinux.org/index.php/NetworkManager#Using_Gnome-Keyring
-# https://wiki.archlinux.org/index.php/GNOME/Keyring#Installation
-pacman_sync gnome-keyring || die "Couldn't install 'gnome-keyring'."
-# https://wiki.archlinux.org/index.php/GNOME/Keyring#PAM_method
-gawk --include inplace '
-  BEGIN {
-      auth_rule = "auth       optional     pam_gnome_keyring.so"
-      session_rule = "session    optional     pam_gnome_keyring.so auto_start"
-  }
-
-  # remove old rules for "pam_gnome_keyring.so"
-  /\ypam_gnome_keyring\.so\y/ { next }
-
-  ($1 == "account" || $1 == "password" || $1 == "session") && auth_rule != "" {
-      print auth_rule; auth_rule = ""
-  }
-  { print }
-  ENDFILE {
-      if (auth_rule != "") print auth_rule
-      print session_rule
-  }
-' /etc/pam.d/login || die "Couldn't patch '/etc/pam.d/login'."
-gawk --include inplace '
-  BEGIN {
-      password_rule = "password	optional	pam_gnome_keyring.so"
-  }
-
-  # remove old rules for "pam_gnome_keyring.so"
-  /\ypam_gnome_keyring\.so\y/ { next }
-
-  $1 == "session" && password_rule != "" {
-      print password_rule; password_rule = ""
-  }
-  { print }
-  ENDFILE {
-      if (password_rule != "") print password_rule
-  }
-' /etc/pam.d/passwd || die "Couldn't patch '/etc/pam.d/passwd'."
 
 # https://wiki.archlinux.org/index.php/general_recommendations#Setting_up_a_firewall
 # https://wiki.archlinux.org/index.php/Security#Firewalls
