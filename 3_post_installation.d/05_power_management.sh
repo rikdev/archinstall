@@ -82,8 +82,8 @@ systemctl enable "${ROOT_SUSPEND_SERVICE_NAME}" \
 pacman_sync upower || die "Couldn't install 'upower'."
 udevadm_reload
 sed --in-place \
-  --expression 's/^\(PercentageLow\)=.*/\1=50/' \
-  --expression 's/^\(PercentageCritical\)=.*/\1=40/' \
-  --expression 's/^\(PercentageAction\)=.*/\1=30/' \
+  --expression 's/^\(PercentageLow\)=.*/\1=40/' \
+  --expression 's/^\(PercentageCritical\)=.*/\1=30/' \
+  --expression 's/^\(PercentageAction\)=.*/\1=20/' \
   /etc/UPower/UPower.conf || die "Couldn't patch '/etc/UPower/UPower.conf'."
 systemctl enable --now upower.service || die "Couldn't start 'upower.service'."
