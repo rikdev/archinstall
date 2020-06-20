@@ -13,11 +13,11 @@ readonly SWAP_FILE_PATH="${ROOT_DIR}/${SWAP_FILE_NAME}"
 if ! swapon --show | grep --silent "${SWAP_FILE_PATH}"; then
   print_section "Create swap"
   if test_to_agree "Do create a swap file?"; then
-    readonly RAM_SIZE="$(free --bytes | awk '$1 == "Mem:" { print $2 }')"
+    readonly RAM_SIZE="$(free --mega | awk '$1 == "Mem:" { print $2 }')"
     [[ -n "${RAM_SIZE}" ]] || die "Couldn't get RAM size."
 
     # shellcheck disable=SC2015
-    fallocate --length "${RAM_SIZE}" "${SWAP_FILE_PATH}" \
+    dd if=/dev/zero of="${SWAP_FILE_PATH}" bs=1M count="${RAM_SIZE}" status=progress \
       && chmod 600 "${SWAP_FILE_PATH}" \
       && mkswap "${SWAP_FILE_PATH}" \
       && swapon "${SWAP_FILE_PATH}" \
