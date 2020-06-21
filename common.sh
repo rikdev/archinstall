@@ -58,6 +58,17 @@ pacman_sync() {
   pacman --sync --noconfirm --needed "$@"
 }
 
+pacman_remove() {
+  for package in "$@"; do
+    echo "Removing package '${package}'"
+    if pacman --query >/dev/null 2>/dev/null "${package}"; then
+      pacman --noconfirm --remove --recursive "${package}" || return "$?"
+    else
+      echo "Package '${package}' was not found"
+    fi
+  done
+}
+
 udevadm_reload() {
   udevadm control --reload && udevadm trigger
 }
