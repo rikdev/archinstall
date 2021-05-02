@@ -11,8 +11,7 @@ pacman_sync cups{,-pdf} || die "Couldn't install printing utilites."
 # https://www.cups-pdf.de/documentation.shtml#Installation
 killall --quiet -- cupsd || true
 # https://wiki.archlinux.org/index.php/CUPS#Socket_activation
-systemctl enable --now org.cups.cupsd.socket \
-  || die "Couldn't start 'org.cups.cupsd.socket'."
+systemctl enable --now cups.socket || die "Couldn't start 'cups.socket'."
 # https://wiki.archlinux.org/index.php/CUPS#CLI_tools
 lpadmin \
   -p Virtual_PDF_Printer \
