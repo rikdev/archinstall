@@ -16,6 +16,8 @@ is_uefi_boot_mode && echo "UEFI boot mode." || echo "BIOS boot mode."
 
 # https://wiki.archlinux.org/index.php/installation_guide#Connect_to_the_Internet
 print_section "Check connect to the Internet"
+ip link
+echo
 ping -c1 archlinux.org || die "No internet connection."
 
 # https://wiki.archlinux.org/index.php/installation_guide#Update_the_system_clock
