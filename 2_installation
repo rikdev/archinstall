@@ -66,8 +66,25 @@ arch-chroot "${ROOT_DIR}" /bin/bash <(cat common.sh - <<'EOF'
 			127.0.0.1 ${REPLY}
 		NEOF
 	fi
-	pacman_sync dhcpcd || die "Couldn't install 'dhcpcd'."
-	systemctl enable dhcpcd.service || die "Couldn't enable 'dhcpcd.service'."
+
+	# https://wiki.archlinux.org/title/Systemd-networkd#Required_services_and_setup
+	# https://wiki.archlinux.org/index.php/general_recommendations#DNS_security
+	systemctl enable systemd-resolved.service \
+		|| die "Couldn't start 'systemd-resolved.service'."
+
+	# https://wiki.archlinux.org/index.php/systemd-resolved#Automatically
+	# https://wiki.archlinux.org/index.php/systemd-resolved#Configuration
+	# https://wiki.archlinux.org/index.php/Systemd-networkd#network_files
+	cat <<-'NEOF' > /etc/systemd/network/99-default.network
+		[Match]
+		Type=ether wlan
+
+		[Network]
+		DHCP=yes
+	NEOF
+	# https://wiki.archlinux.org/index.php/Systemd-networkd#Required_services_and_setup
+	systemctl enable systemd-networkd.service \
+		|| die "Couldn't enable 'systemd-networkd.service'."
 
 	# https://wiki.archlinux.org/index.php/installation_guide#Root_password
 	print_section "Root password"

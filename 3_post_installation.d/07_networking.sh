@@ -16,34 +16,6 @@ print_subsection "Clock synchronization"
 # https://wiki.archlinux.org/index.php/Systemd-timesyncd#Usage
 timedatectl set-ntp true || die "Couldn't enable NTP."
 
-# https://wiki.archlinux.org/index.php/general_recommendations#DNS_security
-print_subsection "DNS security"
-# dhcpcd can owerwrite 'resolv.conf'
-# https://wiki.archlinux.org/index.php/Dhcpcd#resolv.conf
-systemctl disable --now dhcpcd.service
-
-# https://wiki.archlinux.org/index.php/systemd-resolved#Configuration
-ln --symbolic --force /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
-systemctl enable --now systemd-resolved.service \
-	|| die "Couldn't start 'systemd-resolved.service'."
-
-# https://wiki.archlinux.org/index.php/systemd-resolved#Automatically
-# https://wiki.archlinux.org/index.php/systemd-resolved#Configuration
-# https://wiki.archlinux.org/index.php/Systemd-networkd#network_files
-cat <<'EOF' > /etc/systemd/network/99-default.network
-[Match]
-Type=ether wlan
-
-[Network]
-DHCP=yes
-EOF
-# https://wiki.archlinux.org/index.php/Systemd-networkd#Required_services_and_setup
-systemctl enable --now systemd-networkd.service \
-	|| die "Couldn't enable 'systemd-networkd.service'."
-
-# https://wiki.archlinux.org/index.php/Network_configuration#Check_the_connection
-retry ping -c1 archlinux.org || die "Couldn't ping 'archlinux.org'."
-
 # https://wiki.archlinux.org/index.php/general_recommendations#Setting_up_a_firewall
 # https://wiki.archlinux.org/index.php/Security#Firewalls
 print_subsection "Setting up a firewall"
@@ -113,6 +85,9 @@ sed --in-place '
 # https://wiki.archlinux.org/index.php/nftables#Usage
 systemctl enable --now nftables.service \
 	|| die "Couldn't start 'nftables.service'."
+
+# https://wiki.archlinux.org/index.php/Network_configuration#Check_the_connection
+retry ping -c1 archlinux.org || die "Couldn't ping 'archlinux.org'."
 
 # https://wiki.archlinux.org/index.php/general_recommendations#Resource_sharing
 print_subsection "Resource sharing"
