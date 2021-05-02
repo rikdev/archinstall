@@ -6,19 +6,19 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 source common.sh
 
 git_etc() {
-  git -C /etc "$@"
+	git -C /etc "$@"
 }
 
 git_commit_all() {
-  local -r LOCAL_MESSAGE="$1"
+	local -r LOCAL_MESSAGE="$1"
 
-  git_etc add --all || return
-  git_etc commit --allow-empty --message="${LOCAL_MESSAGE}"
+	git_etc add --all || return
+	git_etc commit --allow-empty --message="${LOCAL_MESSAGE}"
 }
 
 echo "WARNING! Your system settings will be overwritten!"
 if ! test_to_agree "Continue?"; then
-  exit 0
+	exit 0
 fi
 
 # https://wiki.archlinux.org/index.php/Dotfiles#Version_control
@@ -29,23 +29,23 @@ git_etc init || die "Couldn't initialize git repository in '/etc' directory."
 chmod 700 /etc/.git
 # configure git
 if ! git_etc config user.name > /dev/null; then
-  git config --global user.name "${USER}"
+	git config --global user.name "${USER}"
 fi
 if ! git_etc config user.email > /dev/null; then
-  git config --global user.email "${USER}@$(cat /etc/hostname)"
+	git config --global user.email "${USER}@$(cat /etc/hostname)"
 fi
 # initial commit
 git_commit_all "Before run '$(basename "$0")'" \
-  || die "Couldn't commit changes in '/etc' directory."
+	|| die "Couldn't commit changes in '/etc' directory."
 
 for f in ./3_post_installation.d/?*.sh; do
-  /bin/bash "${f}" || exit "$?"
+	/bin/bash "${f}" || exit "$?"
 done
 unset f
 
 echo
 git_commit_all "After run '$(basename "$0")'" \
-  || die "Couldn't commit changes in '/etc' directory."
+	|| die "Couldn't commit changes in '/etc' directory."
 
 echo
 cat <<EOF
@@ -58,5 +58,5 @@ cat <<EOF
 EOF
 
 if test_to_agree "Do reboot a system to apply all settings?"; then
-  reboot
+	reboot
 fi

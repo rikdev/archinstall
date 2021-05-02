@@ -14,12 +14,12 @@ killall --quiet -- cupsd || true
 systemctl enable --now cups.socket || die "Couldn't start 'cups.socket'."
 # https://wiki.archlinux.org/index.php/CUPS#CLI_tools
 lpadmin \
-  -p Virtual_PDF_Printer \
-  -D 'Virtual PDF Printer' \
-  -E \
-  -v 'cups-pdf:/' \
-  -m 'CUPS-PDF_noopt.ppd' \
-  || die "Couldn't add or modify 'Virtual PDF Printer'."
+	-p Virtual_PDF_Printer \
+	-D 'Virtual PDF Printer' \
+	-E \
+	-v 'cups-pdf:/' \
+	-m 'CUPS-PDF_noopt.ppd' \
+	|| die "Couldn't add or modify 'Virtual PDF Printer'."
 
 lpadmin -d Virtual_PDF_Printer \
-  || die "Couldn't set 'Virtual PDF Printer' as default printer."
+	|| die "Couldn't set 'Virtual PDF Printer' as default printer."

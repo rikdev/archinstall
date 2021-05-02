@@ -11,76 +11,76 @@ readonly ROOT_DIR=/mnt
 # https://wiki.archlinux.org/index.php/installation_guide#Format_the_partitions
 readonly SWAP_FILE_PATH="${ROOT_DIR}/${SWAP_FILE_NAME}"
 if ! swapon --show | grep --silent "${SWAP_FILE_PATH}"; then
-  print_section "Create swap"
-  if test_to_agree "Do create a swap file?"; then
-    readonly RAM_SIZE="$(free --mega | awk '$1 == "Mem:" { print $2 }')"
-    [[ -n "${RAM_SIZE}" ]] || die "Couldn't get RAM size."
+	print_section "Create swap"
+	if test_to_agree "Do create a swap file?"; then
+		readonly RAM_SIZE="$(free --mega | awk '$1 == "Mem:" { print $2 }')"
+		[[ -n "${RAM_SIZE}" ]] || die "Couldn't get RAM size."
 
-    # shellcheck disable=SC2015
-    dd if=/dev/zero of="${SWAP_FILE_PATH}" bs=1M count="${RAM_SIZE}" status=progress \
-      && chmod 600 "${SWAP_FILE_PATH}" \
-      && mkswap "${SWAP_FILE_PATH}" \
-      && swapon "${SWAP_FILE_PATH}" \
-      && echo "Created a swap file '${SWAP_FILE_PATH}' of size ${RAM_SIZE} bytes." \
-      || die "Couldn't create swap."
-  fi
+		# shellcheck disable=SC2015
+		dd if=/dev/zero of="${SWAP_FILE_PATH}" bs=1M count="${RAM_SIZE}" status=progress \
+			&& chmod 600 "${SWAP_FILE_PATH}" \
+			&& mkswap "${SWAP_FILE_PATH}" \
+			&& swapon "${SWAP_FILE_PATH}" \
+			&& echo "Created a swap file '${SWAP_FILE_PATH}' of size ${RAM_SIZE} bytes." \
+			|| die "Couldn't create swap."
+	fi
 fi
 
 # https://wiki.archlinux.org/index.php/Installation_guide#Install_essential_packages
 print_section "Install essential packages"
 pacstrap "${ROOT_DIR}" base linux linux-firmware \
-  || die "Couldn't install 'base' package, Linux kernel and firmware for common hardware."
+	|| die "Couldn't install 'base' package, Linux kernel and firmware for common hardware."
 
 # https://wiki.archlinux.org/index.php/installation_guide#Fstab
 print_section "Setup fstab"
 sed --in-place '5,$ d' "${ROOT_DIR}/etc/fstab" || die "Couldn't cut fstab."
 genfstab -U "${ROOT_DIR}" >> "${ROOT_DIR}/etc/fstab" \
-  || die "Couldn't setup fstab."
+	|| die "Couldn't setup fstab."
 
 # https://wiki.archlinux.org/index.php/installation_guide#Chroot
 print_section "Chroot"
 arch-chroot "${ROOT_DIR}" /bin/bash <(cat common.sh - <<'EOF'
-  # https://wiki.archlinux.org/index.php/installation_guide#Time_zone
-  print_section "Time zone"
-  ln --symbolic --force /usr/share/zoneinfo/Asia/Novosibirsk /etc/localtime
-  hwclock --systohc || die "Couldn't generate '/etc/adjtime'."
+	# https://wiki.archlinux.org/index.php/installation_guide#Time_zone
+	print_section "Time zone"
+	ln --symbolic --force /usr/share/zoneinfo/Asia/Novosibirsk /etc/localtime
+	hwclock --systohc || die "Couldn't generate '/etc/adjtime'."
 
-  # https://wiki.archlinux.org/index.php/installation_guide#Localization
-  print_section "Localization"
-  sed --in-place 's/^#\(en_US\.UTF-8\|ru_RU\.UTF-8\)/\1/' /etc/locale.gen \
-    || die "Couldn't patch '/etc/locale.gen'."
-  locale-gen || die "Couldn't generate locale."
-  echo "LANG=en_US.UTF-8" > /etc/locale.conf
-  echo "KEYMAP=${KEYMAP}" > /etc/vconsole.conf
-  echo "FONT=${FONT}" >> /etc/vconsole.conf
+	# https://wiki.archlinux.org/index.php/installation_guide#Localization
+	print_section "Localization"
+	sed --in-place 's/^#\(en_US\.UTF-8\|ru_RU\.UTF-8\)/\1/' /etc/locale.gen \
+		|| die "Couldn't patch '/etc/locale.gen'."
+	locale-gen || die "Couldn't generate locale."
+	echo "LANG=en_US.UTF-8" > /etc/locale.conf
+	echo "KEYMAP=${KEYMAP}" > /etc/vconsole.conf
+	echo "FONT=${FONT}" >> /etc/vconsole.conf
 
-  # https://wiki.archlinux.org/index.php/installation_guide#Network_configuration
-  print_section "Network configuration"
-  if [[ ! -e /etc/hostname ]]; then
-    read -r -p "Input your hostname: "
-    [[ -n "${REPLY}" ]] || die "Invalid hostname."
-    echo "${REPLY}" > /etc/hostname
-    echo -e "127.0.0.1\t${REPLY}" >> "/etc/hosts"
-  fi
-  pacman_sync dhcpcd || die "Couldn't install 'dhcpcd'."
-  systemctl enable dhcpcd.service || die "Couldn't enable 'dhcpcd.service'."
+	# https://wiki.archlinux.org/index.php/installation_guide#Network_configuration
+	print_section "Network configuration"
+	if [[ ! -e /etc/hostname ]]; then
+		read -r -p "Input your hostname: "
+		[[ -n "${REPLY}" ]] || die "Invalid hostname."
+		echo "${REPLY}" > /etc/hostname
+		echo -e "127.0.0.1\t${REPLY}" >> "/etc/hosts"
+	fi
+	pacman_sync dhcpcd || die "Couldn't install 'dhcpcd'."
+	systemctl enable dhcpcd.service || die "Couldn't enable 'dhcpcd.service'."
 
-  # https://wiki.archlinux.org/index.php/installation_guide#Root_password
-  print_section "Root password"
-  passwd || die "Couldn't set root password."
+	# https://wiki.archlinux.org/index.php/installation_guide#Root_password
+	print_section "Root password"
+	passwd || die "Couldn't set root password."
 
-  # https://wiki.archlinux.org/index.php/installation_guide#Boot_loader
-  print_section "Boot loader"
-  if grep --silent '^vendor_id[[:space:]]*: GenuineIntel' /proc/cpuinfo; then
-    pacman_sync intel-ucode || die "Couldn't install 'intel-ucode'."
-  fi
-  if grep --silent '^vendor_id[[:space:]]*: AuthenticAMD' /proc/cpuinfo; then
-    pacman_sync amd-ucode || die "Couldn't install 'amd-ucode'."
-  fi
-  if is_uefi_boot_mode; then
-    pacman_sync efibootmgr || die "Couldn't install 'efibootmgr'."
-  fi
-  pacman_sync grub || die "Couldn't install 'grub'."
+	# https://wiki.archlinux.org/index.php/installation_guide#Boot_loader
+	print_section "Boot loader"
+	if grep --silent '^vendor_id[[:space:]]*: GenuineIntel' /proc/cpuinfo; then
+		pacman_sync intel-ucode || die "Couldn't install 'intel-ucode'."
+	fi
+	if grep --silent '^vendor_id[[:space:]]*: AuthenticAMD' /proc/cpuinfo; then
+		pacman_sync amd-ucode || die "Couldn't install 'amd-ucode'."
+	fi
+	if is_uefi_boot_mode; then
+		pacman_sync efibootmgr || die "Couldn't install 'efibootmgr'."
+	fi
+	pacman_sync grub || die "Couldn't install 'grub'."
 EOF
 ) || exit "$?"
 

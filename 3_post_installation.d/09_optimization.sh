@@ -27,7 +27,7 @@ w     /sys/module/zswap/parameters/compressor -    -   -   -   lz4
 w     /sys/module/zswap/parameters/zpool      -    -   -   -   z3fold
 EOF
 systemd-tmpfiles --create "${ZSWAP_CONF_FILE_PATH}" \
-  || die "Couldn't apply '${ZSWAP_CONF_FILE_PATH}'."
+	|| die "Couldn't apply '${ZSWAP_CONF_FILE_PATH}'."
 
 # https://wiki.archlinux.org/index.php/Improving_performance#Watchdogs
 cat <<'EOF' > /etc/modprobe.d/blacklist-watchdogs.conf
@@ -42,7 +42,7 @@ kernel.soft_watchdog = 0
 kernel.watchdog = 0
 EOF
 sysctl --load="${WATCHDOGS_CONF_FILE_PATH}" \
-  || die "Couldn't load '${WATCHDOGS_CONF_FILE_PATH}'"
+	|| die "Couldn't load '${WATCHDOGS_CONF_FILE_PATH}'"
 # https://wiki.archlinux.org/index.php/general_recommendations#Solid_state_drives
 # https://wiki.archlinux.org/index.php/Solid_state_drive#Periodic_TRIM
 systemctl enable --now fstrim.timer || die "Couldn't start 'fstrim.timer'."

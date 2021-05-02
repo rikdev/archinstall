@@ -11,10 +11,10 @@ pacman_sync xorg-server || die "Couldn't install 'xorg-server'."
 # https://wiki.archlinux.org/index.php/Keyboard_configuration_in_Xorg#Using_X_configuration_files
 cat <<'EOF' > /etc/X11/xorg.conf.d/00-keyboard.conf
 Section "InputClass"
-        Identifier "system-keyboard"
-        MatchIsKeyboard "on"
-        Option "XkbLayout" "us,ru"
-        Option "XkbOptions" "grp:caps_toggle,grp_led:scroll,terminate:ctrl_alt_bksp"
+	Identifier "system-keyboard"
+	MatchIsKeyboard "on"
+	Option "XkbLayout" "us,ru"
+	Option "XkbOptions" "grp:caps_toggle,grp_led:scroll,terminate:ctrl_alt_bksp"
 EndSection
 EOF
 
@@ -24,11 +24,11 @@ pacman_sync xorg-xinit || die "Couldn't install 'xorg-xinit'."
 cat <<'EOF' > /etc/X11/xinit/xserverrc
 #!/bin/sh
 exec /usr/bin/X \
-  -nolisten tcp \
-  -nolisten local \
-  -ardelay 200 \
-  -arinterval 30 \
-  "$@" vt$XDG_VTNR
+	-nolisten tcp \
+	-nolisten local \
+	-ardelay 200 \
+	-arinterval 30 \
+	"$@" vt$XDG_VTNR
 EOF
 
 echo -n > /etc/X11/xinit/.Xresources
@@ -61,14 +61,14 @@ EOF
 
 # https://wiki.archlinux.org/index.php/Fonts
 pacman_sync xorg-fonts-{misc,cyrillic} ttf-dejavu \
-  || die "Couldn't install fonts."
+	|| die "Couldn't install fonts."
 if [[ -n "${DISPLAY:-}" ]]; then
-  xset fp rehash || die "Couldn't reread font databases."
+	xset fp rehash || die "Couldn't reread font databases."
 fi
 
 # https://wiki.archlinux.org/index.php/Cursor_themes
 pacman_sync adwaita-icon-theme \
-  || die "Couldn't install 'adwaita-icon-theme'."
+	|| die "Couldn't install 'adwaita-icon-theme'."
 cat <<'EOF' >> /etc/X11/xinit/.Xresources
 ! Cursor setting
 ! https://wiki.archlinux.org/index.php/Cursor_themes#X_resources
@@ -76,43 +76,43 @@ Xcursor.theme: Adwaita
 EOF
 
 if test_to_agree "Do install optional software (xterm)?"; then
-  pacman_sync xterm || die "Couldn't install 'xterm'."
-  cat <<'EOF' >> /etc/X11/xinit/.Xresources
-! xterm settings
-! https://wiki.archlinux.org/index.php/Xterm#Configuration
-! https://wiki.archlinux.org/index.php/Xterm#TERM_Environmental_Variable
-xterm.*.termName: xterm-256color
-! https://wiki.archlinux.org/index.php/Xterm#UTF-8
-xterm.*.vt100.locale: true
-! https://wiki.archlinux.org/index.php/Xterm#Make_.27Alt.27_key_behave_as_on_other_terminal_emulators
-xterm.*.vt100.metaSendsEscape: true
-! https://wiki.archlinux.org/index.php/Xterm#Fix_the_backspace_key
-xterm.*.vt100.backarrowKey: false
-xterm.ttyModes: erase ^?
-! https://wiki.archlinux.org/index.php/Xterm#Scrolling
-xterm.*.vt100.saveLines: 4096
-! https://wiki.archlinux.org/index.php/Xterm#Scrollbar
-xterm.*.vt100.scrollBar: false
-xterm.*.vt100.scrollBar.width: 8
-xterm.*.vt100.rightScrollBar: true
-! https://wiki.archlinux.org/index.php/Xterm#Colors
-xterm.*.vt100.foreground: white
-xterm.*.vt100.background: black
-! https://wiki.archlinux.org/index.php/Xterm#Default_fonts
-xterm.*.vt100.faceName: DejaVu Sans Mono
-xterm.*.vt100.faceSize: 10
-! https://wiki.archlinux.org/index.php/Xterm#Enable_bell_urgency
-xterm.*.vt100.bellIsUrgent: true
-! https://wiki.archlinux.org/index.php/Xterm#Adjust_line_spacing
-xterm.*.vt100.scaleHeight: 1.01
-EOF
+	pacman_sync xterm || die "Couldn't install 'xterm'."
+	cat <<-'EOF' >> /etc/X11/xinit/.Xresources
+	! xterm settings
+	! https://wiki.archlinux.org/index.php/Xterm#Configuration
+	! https://wiki.archlinux.org/index.php/Xterm#TERM_Environmental_Variable
+	xterm.*.termName: xterm-256color
+	! https://wiki.archlinux.org/index.php/Xterm#UTF-8
+	xterm.*.vt100.locale: true
+	! https://wiki.archlinux.org/index.php/Xterm#Make_.27Alt.27_key_behave_as_on_other_terminal_emulators
+	xterm.*.vt100.metaSendsEscape: true
+	! https://wiki.archlinux.org/index.php/Xterm#Fix_the_backspace_key
+	xterm.*.vt100.backarrowKey: false
+	xterm.ttyModes: erase ^?
+	! https://wiki.archlinux.org/index.php/Xterm#Scrolling
+	xterm.*.vt100.saveLines: 4096
+	! https://wiki.archlinux.org/index.php/Xterm#Scrollbar
+	xterm.*.vt100.scrollBar: false
+	xterm.*.vt100.scrollBar.width: 8
+	xterm.*.vt100.rightScrollBar: true
+	! https://wiki.archlinux.org/index.php/Xterm#Colors
+	xterm.*.vt100.foreground: white
+	xterm.*.vt100.background: black
+	! https://wiki.archlinux.org/index.php/Xterm#Default_fonts
+	xterm.*.vt100.faceName: DejaVu Sans Mono
+	xterm.*.vt100.faceSize: 10
+	! https://wiki.archlinux.org/index.php/Xterm#Enable_bell_urgency
+	xterm.*.vt100.bellIsUrgent: true
+	! https://wiki.archlinux.org/index.php/Xterm#Adjust_line_spacing
+	xterm.*.vt100.scaleHeight: 1.01
+	EOF
 fi
 
 # https://wiki.archlinux.org/index.php/general_recommendations#Display_drivers
 print_subsection "Display drivers"
 # https://wiki.archlinux.org/index.php/Hyper-V#Xorg
 if hostnamectl | grep --silent '\bVirtualization: microsoft\b'; then
-  pacman_sync xf86-video-fbdev || die "Couldn't install 'xf86-video-fbdev'."
+	pacman_sync xf86-video-fbdev || die "Couldn't install 'xf86-video-fbdev'."
 fi
 
 # https://wiki.archlinux.org/index.php/General_recommendations#Window_managers
@@ -131,7 +131,7 @@ print_subsection "Display manager"
 # https://wiki.archlinux.org/index.php/Xinit#Autostart_X_at_login
 # shellcheck disable=SC2016
 echo '[ -z "${DISPLAY:-}" -a "$(tty)" = "/dev/tty1" ] && exec startx' \
-  > /etc/profile.d/startx.sh
+	> /etc/profile.d/startx.sh
 
 # https://wiki.archlinux.org/index.php/General_recommendations#User_directories
 print_subsection "User directories"

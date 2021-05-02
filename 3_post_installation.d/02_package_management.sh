@@ -13,9 +13,9 @@ systemctl enable --now paccache.timer || die "Couldn't start 'paccache.timer'."
 # https://wiki.archlinux.org/index.php/General_recommendations#Repositories
 print_subsection "Repositories"
 sed --in-place '/\[multilib\]/,/^$/ s/#//' /etc/pacman.conf \
-  || die "Couldn't patch '/etc/pacman.conf'."
+	|| die "Couldn't patch '/etc/pacman.conf'."
 pacman --sync --noconfirm --refresh --sysupgrade \
-  || die "Couldn't refresh package databases."
+	|| die "Couldn't refresh package databases."
 
 # https://wiki.archlinux.org/index.php/general_recommendations#Arch_User_Repository
 print_subsection "Arch User Repository"

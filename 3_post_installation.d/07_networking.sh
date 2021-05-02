@@ -5,10 +5,10 @@ source common.sh
 print_section "Networking"
 
 if test_to_agree "Do install bluetooth utilites (bluez, bluez-utils)?"; then
-  # https://wiki.archlinux.org/index.php/bluetooth#Installation
-  pacman_sync bluez{,-utils} || die "Couldn't install Bluetooth tools."
-  systemctl enable --now bluetooth.service \
-    || die "Couldn't start 'bluetooth.service'."
+	# https://wiki.archlinux.org/index.php/bluetooth#Installation
+	pacman_sync bluez{,-utils} || die "Couldn't install Bluetooth tools."
+	systemctl enable --now bluetooth.service \
+		|| die "Couldn't start 'bluetooth.service'."
 fi
 
 # https://wiki.archlinux.org/index.php/General_recommendations#Clock_synchronization
@@ -25,7 +25,7 @@ systemctl disable --now dhcpcd.service
 # https://wiki.archlinux.org/index.php/systemd-resolved#Configuration
 ln --symbolic --force /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 systemctl enable --now systemd-resolved.service \
-  || die "Couldn't start 'systemd-resolved.service'."
+	|| die "Couldn't start 'systemd-resolved.service'."
 
 # https://wiki.archlinux.org/index.php/systemd-resolved#Automatically
 # https://wiki.archlinux.org/index.php/systemd-resolved#Configuration
@@ -39,7 +39,7 @@ DHCP=yes
 EOF
 # https://wiki.archlinux.org/index.php/Systemd-networkd#Required_services_and_setup
 systemctl enable --now systemd-networkd.service \
-  || die "Couldn't enable 'systemd-networkd.service'."
+	|| die "Couldn't enable 'systemd-networkd.service'."
 
 # https://wiki.archlinux.org/index.php/Network_configuration#Check_the_connection
 retry ping -c1 archlinux.org || die "Couldn't ping 'archlinux.org'."
@@ -112,13 +112,13 @@ sed --in-place '
 ' /etc/nftables.conf || "Couldn't patch '/etc/nftables.conf'."
 # https://wiki.archlinux.org/index.php/nftables#Usage
 systemctl enable --now nftables.service \
-  || die "Couldn't start 'nftables.service'."
+	|| die "Couldn't start 'nftables.service'."
 
 # https://wiki.archlinux.org/index.php/general_recommendations#Resource_sharing
 print_subsection "Resource sharing"
 if test_to_agree "Do install smbclient?"; then
-  # https://wiki.archlinux.org/index.php/Samba#Client
-  pacman_sync smbclient || die "Couldn't install 'smbclient'."
-  mkdir --parent /etc/samba
-  touch /etc/samba/smb.conf
+	# https://wiki.archlinux.org/index.php/Samba#Client
+	pacman_sync smbclient || die "Couldn't install 'smbclient'."
+	mkdir --parent /etc/samba
+	touch /etc/samba/smb.conf
 fi
