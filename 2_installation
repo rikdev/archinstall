@@ -60,7 +60,11 @@ arch-chroot "${ROOT_DIR}" /bin/bash <(cat common.sh - <<'EOF'
 		read -r -p "Input your hostname: "
 		[[ -n "${REPLY}" ]] || die "Invalid hostname."
 		echo "${REPLY}" > /etc/hostname
-		echo -e "127.0.0.1\t${REPLY}" >> "/etc/hosts"
+		cat <<-NEOF | column --table >> '/etc/hosts'
+			127.0.0.1 localhost
+			::1 localhost
+			127.0.0.1 ${REPLY}
+		NEOF
 	fi
 	pacman_sync dhcpcd || die "Couldn't install 'dhcpcd'."
 	systemctl enable dhcpcd.service || die "Couldn't enable 'dhcpcd.service'."
