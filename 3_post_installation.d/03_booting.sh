@@ -9,8 +9,7 @@ print_subsection "GRUB config"
 sed --in-place '
 	# https://wiki.archlinux.org/index.php/GRUB/Tips_and_tricks#Multiple_entries
 	# https://wiki.archlinux.org/index.php/GRUB/Tips_and_tricks#Disable_submenu
-	$a GRUB_DISABLE_SUBMENU=y
-	/^GRUB_DISABLE_SUBMENU=/ D
+	/^#\s*GRUB_DISABLE_SUBMENU=/ s/#//
 	# https://wiki.archlinux.org/index.php/GRUB/Tips_and_tricks#Recall_previous_entry
 	s/^GRUB_DEFAULT=.*/GRUB_DEFAULT=saved/
 	/^#\s*GRUB_SAVEDEFAULT=/ s/#//
