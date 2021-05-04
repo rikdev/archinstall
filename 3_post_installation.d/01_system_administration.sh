@@ -28,7 +28,8 @@ udevadm_reload || die "Couldn't load '${USBSERIAL_RULES_FILE_PATH}'"
 # https://wiki.archlinux.org/index.php/General_recommendations#Privilege_escalation
 print_subsection "Privilege escalation"
 pacman_sync sudo || die "Couldn't install 'sudo'."
-echo '%wheel ALL=(ALL) ALL' > /etc/sudoers.d/10_wheel
+echo '%wheel ALL=(ALL) ALL' > /etc/sudoers.d/wheel
+echo 'Defaults passwd_timeout=0' > /etc/sudoers.d/no-passwd-timeout
 
 # https://wiki.archlinux.org/index.php/Polkit
 # https://wiki.archlinux.org/index.php/Systemd#Power_management
