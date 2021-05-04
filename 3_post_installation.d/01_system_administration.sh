@@ -10,7 +10,7 @@ if test_to_agree "Do add a new admin user?"; then
 	read -r -p "Input your username: "
 	[[ -n "${REPLY}" ]] || die "Invalid username."
 	# https://wiki.archlinux.org/index.php/Users_and_groups#User_management
-	useradd --create-home --groups sys,users,wheel "${REPLY}" \
+	useradd --create-home --groups users,wheel "${REPLY}" \
 		|| die "Couldn't create user with name '${REPLY}'."
 	passwd "${REPLY}" || die "Couldn't change password for user '${REPLY}'."
 fi
