@@ -37,16 +37,16 @@ pacman_sync polkit || die "Couldn't install 'polkit'."
 
 # https://wiki.archlinux.org/index.php/General_recommendations#System_maintenance
 print_subsection "System maintenance"
+# https://wiki.archlinux.org/index.php/System_maintenance#Install_the_linux-lts_package
+pacman_sync linux-lts || die "Couldn't install 'linux-lts'."
+grub-mkconfig -o /boot/grub/grub.cfg
+
 # https://wiki.archlinux.org/index.php/Security#Restricting_root_login
 if [[ "$(passwd --status root | cut --field=2 --delimiter=' ')" != 'L' ]]; then
 	if test_to_agree "Do lock the password of the root account?"; then
 		passwd --lock root || die "Couldn't lock root account."
 	fi
 fi
-
-# https://wiki.archlinux.org/index.php/System_maintenance#Install_the_linux-lts_package
-pacman_sync linux-lts || die "Couldn't install 'linux-lts'."
-grub-mkconfig -o /boot/grub/grub.cfg
 
 # https://wiki.archlinux.org/index.php/Security#Allow_only_certain_users
 print_subsection "Allow only certain users"
