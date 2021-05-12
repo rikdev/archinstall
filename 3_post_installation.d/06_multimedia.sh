@@ -4,10 +4,10 @@ source common.sh
 
 print_section "Multimedia"
 
-# https://wiki.archlinux.org/index.php/General_recommendations#Sound
+# https://wiki.archlinux.org/title/General_recommendations#Sound_system
 print_subsection "Sound"
 pacman_sync alsa-utils || die "Couldn't install 'alsa-utils'."
 amixer sset Master unmute 100 || true
 
-# https://wiki.archlinux.org/index.php/PulseAudio#Installation
-pacman_sync pulseaudio{,-bluetooth} || die "Couldn't install PulseAudio."
+# https://wiki.archlinux.org/title/PipeWire#Installation
+pacman_sync pipewire || die "Couldn't install 'PipeWire'."
