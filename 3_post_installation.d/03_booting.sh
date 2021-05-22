@@ -35,13 +35,3 @@ EOF
 systemd-tmpfiles --create "${MEDIA_CONF_FILE_PATH}" \
 	|| die "Couldn't apply '${MEDIA_CONF_FILE_PATH}'."
 # Alternative: https://wiki.archlinux.org/index.php/Udisks#Mount_to_.2Fmedia_.28udisks2.29
-
-# https://wiki.archlinux.org/index.php/general_recommendations#Num_Lock_activation
-print_subsection "Num Lock activation"
-# https://wiki.archlinux.org/index.php/Activating_Numlock_on_Bootup#Extending_getty.40.service
-readonly GETTY_SERVICE_D_PATH=/etc/systemd/system/getty@.service.d
-mkdir --parent "${GETTY_SERVICE_D_PATH}"
-cat <<'EOF' > "${GETTY_SERVICE_D_PATH}/activate-numlock.conf"
-[Service]
-ExecStartPre=/bin/sh -c 'setleds -D +num < /dev/%I'
-EOF
