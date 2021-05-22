@@ -29,6 +29,9 @@ EOF
 systemd-tmpfiles --create "${ZSWAP_CONF_FILE_PATH}" \
 	|| die "Couldn't apply '${ZSWAP_CONF_FILE_PATH}'."
 
+#https://wiki.archlinux.org/title/Improving_performance#Improving_system_responsiveness_under_low-memory_conditions
+systemctl enable --now systemd-oomd.service || die "Couldn't start 'systemd-oomd.service'."
+
 # https://wiki.archlinux.org/index.php/Improving_performance#Watchdogs
 cat <<'EOF' > /etc/modprobe.d/blacklist-watchdogs.conf
 blacklist iTCO_wdt
