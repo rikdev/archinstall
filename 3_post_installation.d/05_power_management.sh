@@ -42,7 +42,7 @@ if swapon --show=NAME | grep --silent "${SWAP_FILE_PATH}"; then
 		|| die "Couldn't make '/boot/grub/grub.cfg'."
 	# https://wiki.archlinux.org/index.php/Power_management/Suspend_and_hibernate#Configure_the_initramfs
 	if ! grep --silent 'HOOKS=(.*\bresume.*)\|HOOKS=(.*\bsystemd.*)' /etc/mkinitcpio.conf; then
-		sed --in-place '/HOOKS=/ s/(\(.*\))/(\1 resume)/' /etc/mkinitcpio.conf \
+		sed --in-place '/^HOOKS=/ s/(\(.*\))/(\1 resume)/' /etc/mkinitcpio.conf \
 			|| "Couldn't patch '/etc/mkinitcpio.conf'."
 		mkinitcpio --preset linux || "Couldn't make initramfs CPIO."
 	fi
